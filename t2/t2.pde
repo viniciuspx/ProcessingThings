@@ -26,6 +26,7 @@ void draw(){
     stroke(colorRNG(),colorRNG(),colorRNG());
     circBrasenham(xc, yc, r);
   }
+  
 }
 
 void keyPressed(){
