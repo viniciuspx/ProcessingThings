@@ -1,4 +1,4 @@
-boolean who = false;
+boolean who;
 int xi, xf, yi, yf;
 int xc, yc, r;
 
@@ -13,13 +13,18 @@ void draw(){
   yi = intRNG();
   xf = intRNG();
   yf = intRNG();
+  xc = intRNG();
+  yc = intRNG();
+  r = (int)random(180);
+  
   
   if(guess(who)){
     stroke(colorRNG(),colorRNG(),colorRNG());
     linDDA(xi,yi,xf,yf);
   }
   else{
-  
+    stroke(colorRNG(),colorRNG(),colorRNG());
+    circBrasenham(xc, yc, r);
   }
 }
 
@@ -68,4 +73,38 @@ void linDDA(int xi, int yi, int xf, int yf){
     
     }
 
+}
+
+
+void circBrasenham (int xc, int yc, int r){
+    
+    int x = 0, y = r, d = 3 - 2*r;
+  
+    while(y >= x)
+    {
+        circle(xc, yc, x, y);
+        x++;
+ 
+        if (d > 0){
+            y--; 
+            d = d + 4 * (x - y) + 10;
+        }
+        
+        else{
+            d = d + 4 * x + 6;
+        }   
+        
+        circle(xc, yc, x, y); 
+    }
+}
+
+void circle(int xc, int yc, int x, int y){
+    point(xc+x, yc+y);
+    point(xc-x, yc+y);
+    point(xc+x, yc-y);
+    point(xc-x, yc-y);
+    point(xc+y, yc+x);
+    point(xc-y, yc+x);
+    point(xc+y, yc-x);
+    point(xc-y, yc-x);
 }
