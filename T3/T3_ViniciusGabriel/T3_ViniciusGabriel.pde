@@ -117,8 +117,7 @@ void desenhaPoligono(int[][] P, int[][] L, color cor_linha, boolean preenche, co
   for(int i = 0 ; i < 800 ; i++){
     for(int j = 0 ; j < 800 ; j++){
       color p = get(i,j);
-      if(p != cor_linha){
-        print("entrou");
+      if(p == cor_linha){
         fill[k] = j;
         k = k + 2;
       }
