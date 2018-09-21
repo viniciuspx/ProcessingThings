@@ -1,5 +1,5 @@
-int n = (int)random(3,18);
-int m = (int)random(3,18);
+int n = (int)random(3,12);
+int m = (int)random(3,15);
 
 int[][] P = new int[n][2];
 int[][] L = new int[m][2];
@@ -10,8 +10,9 @@ void setup(){
 }
 
 void draw(){
-  delay(1000);
+  delay(500);
   desenhaPoligono(P,L,color(intRNG(), intRNG(), intRNG()),true,color(intRNG(), intRNG(), intRNG()));
+  scan();
 }
 
 int colorRNG(){
@@ -92,42 +93,35 @@ void desenhaPoligono(int[][] P, int[][] L, color cor_linha, boolean preenche, co
   
   for(int i = 0 ; i < n; i++){
     for(int j = 0 ; j < 2 ; j++){
-      P[i][j] = intRNG();
+      P[i][j] = intRNG();  
     }
   }
   
-  for(int i = 0 ; i < m ; i++){
+   for(int i = 0 ; i < m; i++){
     for(int j = 0 ; j < 2 ; j++){
-      L[i][j] = intRNG();
+       L[i][j] = (int)random(1, n);  
     }
   }
-  
-  for(int i = 0; i < n; i++){
-    
-    stroke(cor_linha);
-    if(i + 1 < n) linDDA(P[i][0],P[i][1],P[i+1][0],P[i+1][1]);
-    
-    if(i == (n - 1)){
-      stroke(cor_linha);
-      linDDA(P[0][0],P[0][1],P[n-1][0],P[n-1][1]);
-   }
  
+ 
+  for(int i = 0 ; i < m ; i++){
+    stroke(cor_linha);
+    linDDA(P[L[i][0]][0], P[L[i][0]][1], P[L[i][1]][0], P[L[i][1]][1]);
+  
+   if(i == (m - 1)){
+      stroke(cor_linha);
+      linDDA(P[L[0][0]][0], P[L[0][0]][1], P[L[m-1][1]][0], P[L[m-1][1]][1]);
+   }
   }
+
+}
+
+void scan(){
+
+  for(int i = 0 ; i < 800 ; i++){ 
+      stroke(255);
+      linDDA(0,i,799,i);  
+  } 
   
-  for(int i = 0 ; i < 800 ; i++){
-    for(int j = 0 ; j < 800 ; j++){
-      color p = get(i,j);
-      if(p == cor_linha){
-        fill[k] = j;
-        k = k + 2;
-      }
-    }
-    for(int j = 0 ; j < 800 ; j++){
-      if(i + 2 < 800) linDDA(fill[i], 0, fill[i+2], 0);
-    }
-  }
-  
-  
-  
-  
+
 }
