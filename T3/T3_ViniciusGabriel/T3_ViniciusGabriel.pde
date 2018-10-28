@@ -90,7 +90,7 @@ void desenhaPoligono(int[][] P, int[][] L, color cor_linha, boolean preenche, co
   
   int[] fill = new int[800];
   int k = 0;
-  int max;
+  int io = 0;
   
   for(int i = 0 ; i < n; i++){
     for(int j = 0 ; j < 2 ; j++){
@@ -118,6 +118,7 @@ void desenhaPoligono(int[][] P, int[][] L, color cor_linha, boolean preenche, co
   for(int i = 0 ; i < 800 ; i++){
     
     for(int j = 0 ; j < 800 ; j++){
+      
       if(get(i,j) != color(0)){
         fill[k] = i;
         k++;
@@ -128,11 +129,16 @@ void desenhaPoligono(int[][] P, int[][] L, color cor_linha, boolean preenche, co
     
     for(int l = 0 ; l < 800 ; l++){ 
         stroke(cor_linha);
-        if(fill[l] != 0) linDDA(fill[l],i,fill[l+1],i); 
-        if(fill[l] == 0) break;
+        if(io == 0) {
+          linDDA(fill[l],0,fill[l+1],i); 
+          io = 1;
+        }
+        else io = 0;
+        if(fill[l+1] == 0) break;
     }
     
     for(int l = 0 ; l < 800 ; l++) fill[l] = 0;
+    
     k = 0;
     
    }
