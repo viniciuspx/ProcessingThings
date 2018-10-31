@@ -15,10 +15,11 @@ int d = maxz - minz;
 int lines = 8;
 int columns = 4;
 int llines = 12;
+
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-int[][] cube = {
+float[][] cube = {
 
   {-30, -30, -30, 1}, 
   {30, -30, -30, 1}, 
@@ -56,11 +57,13 @@ int[][] L = {
 
 
 
-void linDDA(int xi, int yi, int xf, int yf) {
+void linDDA(float xi, float yi, float xf, float yf) {
 
-  int dx = xf - xi, dy = yf - yi, steps, k;
+  float dx = xf - xi, dy = yf - yi, steps;
 
   float incX, incY, x = xi, y = yi;
+
+  int k;
 
   if (abs(dx) > abs(dy)) steps = abs(dx);
   else steps = abs(dy);
@@ -68,29 +71,29 @@ void linDDA(int xi, int yi, int xf, int yf) {
   incX = dx / (float) steps;
   incY = dy / (float) steps;
 
-  point((int)x, (int)y);
+  point(x, y);
 
   for (k = 0; k < steps; k++) {
 
     x += incX;
     y += incY;  
 
-    point((int)x, (int)y);
+    point(x, y);
   }
 }
 
-int[][] multiplyMatrix(int[][] M, float[][]N, int m, int n, int s) {
+float[][] multiplyMatrix(float[][] M, float[][]N, int m, int n, int s) {
 
-  int R[][] = new int[m][s];
+  float R[][] = new float[m][s];
 
   for (int i=0; i<m; ++i) for (int j=0; j<n; ++j) for (int k=0; k<s; ++k) {
-    R[i][j] += int(M[i][k] * N[k][j]);
+    R[i][j] += M[i][k] * N[k][j];
   } 
 
   return R;
 }
 
-void debPrintM (int[][] M, int l, int c) {
+void debPrintM (float[][] M, int l, int c) {
 
   print(" ------------Matrix------------ \n");
 
@@ -102,16 +105,16 @@ void debPrintM (int[][] M, int l, int c) {
   }
 }
 
-void renderP(int[][] M, int[][] L, int l) {
+void renderP(float[][] M, int[][] L, int l) {
   for (int i = 0; i < l; i ++) {
     stroke(0);
     linDDA(M[L[i][0]][0], M[L[i][0]][1], M[L[i][1]][0], M[L[i][1]][1]);
   }
 }
 
-int[][] getMatrixT(int[][] L, int n, int m) {
+float[][] getMatrixT(float[][] L, int n, int m) {
 
-  int R[][] = new int[n][m];
+  float R[][] = new float[n][m];
 
   for (int i = 0; i < n; i ++) R[i] = transformCoords(L[i][0], L[i][1], L[i][2]);
 
@@ -122,9 +125,9 @@ int[][] getMatrixT(int[][] L, int n, int m) {
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-int[] transformCoords(int x, int y, int z) {
+float[] transformCoords(float x, float y, float z) {
 
-  int[] coords = {0, 0, 0, 1};
+  float[] coords = {0, 0, 0, 1};
 
   float x_l, y_l, z_l;
   float x_ll, y_ll, z_ll;
@@ -139,14 +142,14 @@ int[] transformCoords(int x, int y, int z) {
   y_ll = h - y_l;
   z_ll = d - z_l;
 
-  coords[0] = int(x_ll*m + (width - w*m)/2);
-  coords[1] = int(y_ll*m + (height - w*m)/2);
-  coords[2] = int(z_ll*m);
+  coords[0] = x_ll*m + (width - w*m)/2;
+  coords[1] = y_ll*m + (height - h*m)/2;
+  coords[2] = z_ll*m;
 
   return coords;
 }
 
-int[][] cavaleiraProj(int M[][], int n, int m) {
+float[][] cavaleiraProj(float M[][], int n, int m) {
 
   float[][] C = {{1, 0, 0, 0}, {0, 1, 0, 0}, {sqrt(2)/2*0.5, -sqrt(2)/2*0.5, 1, 0}, {0, 0, 0, 1}};
 
@@ -155,16 +158,16 @@ int[][] cavaleiraProj(int M[][], int n, int m) {
   return M;
 }
 
-int[][] cabinetProj(int M[][], int n, int m) {
+float[][] cabinetProj(float M[][], int n, int m) {
 
-  float[][] C = {{1, 0, 0, 0}, {0, 1, 0, 0}, {sqrt(2)/4*0.5, -sqrt(2)/4*0.5, 1, 0}, {0, 0, 0, 1}};
+  float[][] C = {{1, 0, 0, 0}, {0, 1, 0, 0}, {sqrt(2)/4*0.5, sqrt(2)/4*0.5, 1, 0}, {0, 0, 0, 1}};
 
   M = multiplyMatrix(M, C, n, m, 4);
 
   return M;
 }
 
-int[][] isometricProj(int M[][], int n, int m) {
+float[][] isometricProj(float M[][], int n, int m) {
 
   float[][] I = {{sqrt(2)/2, 1/sqrt(6), 0, 0}, {0, 2/sqrt(6), 0, 0}, {sqrt(2)/2, -1/sqrt(6), 0, 0}, {0, 0, 0, 1}};
 
@@ -173,41 +176,36 @@ int[][] isometricProj(int M[][], int n, int m) {
   return M;
 }
 
-int[][] escapepointProj(int M[][], int n, int m, int fz) {
-  
-  float a = -fz;
-  
-  float[][] EP = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, -1/a}, {0, 0, 0, 1}};
+float[][] escapepointProj(float M[][], int n, int m, float fz) {
+
+  float[][] EP = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, -1/fz}, {0, 0, 0, 1}};
 
   M = multiplyMatrix(M, EP, n, m, 4);
 
   return M;
 }
 
-int[][] escapepoint2Proj(int M[][], int n, int m, int fx, int fz) {
-  
-  float a = -fx;
-  float b = -fz;
-  
-  float[][] EP = {{1, 0, 0, -1/a}, {0, 1, 0, 0}, {0, 0, 1, -1/b}, {0, 0, 0, 1}};
+float[][] escapepoint2Proj(float M[][], int n, int m, float fx, float fz) {
+
+  float[][] EP = {{1, 0, 0, -1/fx}, {0, 1, 0, 0}, {0, 0, 1, -1/fz}, {0, 0, 0, 1}};
 
   M = multiplyMatrix(M, EP, n, m, 4);
 
   return M;
 }
 
-int[][] homogenize(int M[][], int n, int m) {
+float[][] homogenize(float M[][], int n, int m) {
 
   for (int i = 0; i < n; i++) {
     for (int j = 0; j < m; j++) {
-     if(M[i][m-1] != 0) M[i][j] /= M[i][m-1];
+      M[i][j] /= M[i][m-1];
     }
   }
 
   return M;
 }
 
-int[][] rotateM(int M[][], int n, int m, float rz, float rx, float ry) {
+float[][] rotateM(float M[][], int n, int m, float rz, float rx, float ry) {
 
   float[][] R1 = {{cos(rz), sin(rz), 0, 0}, {-sin(rz), cos(rz), 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
   float[][] R2 = {{1, 0, 0, 0}, {0, cos(rx), sin(rx), 0}, {0, -sin(rx), cos(rx), 0}, {0, 0, 0, 1}};
@@ -220,7 +218,7 @@ int[][] rotateM(int M[][], int n, int m, float rz, float rx, float ry) {
   return M;
 }
 
-int[][] translateM(int M[][], int n, int m, float tz, float tx, float ty) {
+float[][] translateM(float M[][], int n, int m, float tz, float tx, float ty) {
 
   float[][] T = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {tx, ty, tz, 1}};
 
@@ -229,7 +227,7 @@ int[][] translateM(int M[][], int n, int m, float tz, float tx, float ty) {
   return M;
 }
 
-int[][] scaleM(int M[][], int n, int m, float sz, float sx, float sy) {
+float[][] scaleM(float M[][], int n, int m, float sz, float sx, float sy) {
 
   float[][] S = {{sx, 0, 0, 0}, {0, sy, 0, 0}, {0, 0, sz, 0}, {1, 1, 1, 1}};
 
@@ -253,20 +251,19 @@ float sz = 1;
 float sx = 1;
 float sy = 1;
 
-int fx = 500;
-int fy = 500;
-int fz = 500;
+float fx = 120;
+float fy = 120;
+float fz = 120;
 
 int p = 0;
-
 
 PFont f;
 
 String[] Projections = {
-  "Cavaleira",
-  "Cabinet",
-  "Isometrica",
-  "1 Pt de Fuga: Z",
+  "Cavaleira", 
+  "Cabinet", 
+  "Isometrica", 
+  "1 Pt de Fuga: Z", 
   "2 Pts de Fuga: XZ"
 };
 
@@ -276,7 +273,7 @@ void draw() {
 
   background(255);
 
-  int M[][] = new int[lines][columns];
+  float M[][] = new float[lines][columns];
 
   M = rotateM(cube, lines, columns, rz, rx, ry);
 
@@ -284,8 +281,7 @@ void draw() {
 
   M = translateM(M, lines, columns, tz, tx, ty);
 
-  M = getMatrixT(M, lines, columns);
-
+  debPrintM(M, lines, columns);
 
   switch(p) {
   case 0:
@@ -307,13 +303,12 @@ void draw() {
     break;
   }
 
-  debPrintM(M, lines, columns);
+  M = getMatrixT(M, lines, columns);
 
   renderP(M, L, llines);
 
+  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
 
-  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n\n Proj: " + Projections[p] + ".";
-  
   textAlign(TOP);
   textFont(f);
   text(text, 5, 45); 
@@ -322,6 +317,7 @@ void draw() {
 
 void setup() {
   size(1200, 800);
+  frameRate(60);
   background(255);
   f = createFont("Arial", 18, true);
 }
