@@ -21,33 +21,33 @@ int llines = 12;
 
 float[][] cube = {
 
-  {-30, -30, -30, 1}, 
-  {30, -30, -30, 1}, 
-  {-30, 30, -30, 1}, 
-  {30, 30, -30, 1}, 
+  {-30, -30, -30, 1},
+  {30, -30, -30, 1},
+  {-30, 30, -30, 1},
+  {30, 30, -30, 1},
 
-  {-30, -30, 30, 1}, 
-  {30, -30, 30, 1}, 
-  {-30, 30, 30, 1}, 
+  {-30, -30, 30, 1},
+  {30, -30, 30, 1},
+  {-30, 30, 30, 1},
   {30, 30, 30, 1}
 
 };
 
 int[][] L = {
 
-  {0, 1}, 
-  {0, 2}, 
-  {2, 3}, 
-  {1, 3}, 
+  {0, 1},
+  {0, 2},
+  {2, 3},
+  {1, 3},
 
-  {4, 5}, 
-  {4, 6}, 
-  {6, 7}, 
-  {7, 5}, 
+  {4, 5},
+  {4, 6},
+  {6, 7},
+  {7, 5},
 
-  {2, 6}, 
-  {0, 4}, 
-  {1, 5}, 
+  {2, 6},
+  {0, 4},
+  {1, 5},
   {3, 7}
 
 };
@@ -76,7 +76,7 @@ void linDDA(float xi, float yi, float xf, float yf) {
   for (k = 0; k < steps; k++) {
 
     x += incX;
-    y += incY;  
+    y += incY;
 
     point(x, y);
   }
@@ -88,7 +88,7 @@ float[][] multiplyMatrix(float[][] M, float[][]N, int m, int n, int s) {
 
   for (int i=0; i<m; ++i) for (int j=0; j<n; ++j) for (int k=0; k<s; ++k) {
     R[i][j] += M[i][k] * N[k][j];
-  } 
+  }
 
   return R;
 }
@@ -260,17 +260,17 @@ int p = 0;
 PFont f;
 
 String[] Projections = {
-  "Cavaleira", 
-  "Cabinet", 
-  "Isometrica", 
-  "1 Pt de Fuga: Z", 
+  "Cavaleira",
+  "Cabinet",
+  "Isometrica",
+  "1 Pt de Fuga: Z",
   "2 Pts de Fuga: XZ"
 };
 
 String text;
 
 void draw() {
-  
+
   smooth();
 
   background(255);
@@ -287,13 +287,13 @@ void draw() {
 
   switch(p) {
   case 0:
-    M = cavaleiraProj(M, lines, columns);   
+    M = cavaleiraProj(M, lines, columns);
     break;
   case 1:
-    M = cabinetProj(M, lines, columns);   
+    M = cabinetProj(M, lines, columns);
     break;
   case 2:
-    M = isometricProj(M, lines, columns);   
+    M = isometricProj(M, lines, columns);
     break;
   case 3:
     M = escapepointProj(M, lines, columns, fz);
@@ -313,7 +313,7 @@ void draw() {
 
   textAlign(TOP);
   textFont(f);
-  text(text, 5, 45); 
+  text(text, 5, 45);
   fill(200, 0, 0);
 }
 
