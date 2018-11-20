@@ -252,11 +252,6 @@ Object[] readFile(){
 
   String cmps[];
 
-  Object[] Objects = new Object[10];
-
-  for( int i=0; i<10; i++ )
-    Objects[i] = new Object();
-
   String[] lines = loadStrings("figure.dat");
 
   maxs = split(lines[1],' ');
@@ -267,6 +262,12 @@ Object[] readFile(){
   maxy = int(maxs[1]);
 
   n = int(lines[2]);
+
+  Object[] Objects = new Object[n];
+
+  for( int i=0; i<n; i++ )
+    Objects[i] = new Object();
+
 
   return Objects;
 }
