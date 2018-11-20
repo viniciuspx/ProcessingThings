@@ -12,9 +12,10 @@ int h = maxy - miny;
 int w = maxx - minx;
 int d = maxz - minz;
 
-int lines = 8;
+int vertices = 8;
 int columns = 4;
-int llines = 12;
+int edges = 12;
+int faces = 6;
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
@@ -38,7 +39,7 @@ float[][] cube = {
 
 };
 
-int[][] L = {
+float[][] L = {
 
   {0, 1},
   {0, 2},
@@ -56,6 +57,8 @@ int[][] L = {
   {3, 7}
 
 };
+
+float[][] cFaces = new float[faces][vertices+3];
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
@@ -110,10 +113,10 @@ void debPrintM (float[][] M, int l, int c) {
   }
 }
 
-void renderP(float[][] M, int[][] L, int l) {
+void renderP(float[][] M, float[][] L, int l) {
   for (int i = 0; i < l; i ++) {
     stroke(0);
-    linDDA(M[L[i][0]][0], M[L[i][0]][1], M[L[i][1]][0], M[L[i][1]][1]);
+    linDDA(M[int(L[i][0])][0], M[int(L[i][0])][1], M[int(L[i][1])][0], M[int(L[i][1])][1]);
   }
 }
 
@@ -244,17 +247,82 @@ float[][] scaleM(float M[][], int n, int m, float sz, float sx, float sy) {
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-float rz = 0;
-float rx = 0;
-float ry = 0;
+class Object {
 
-float tz = 0;
-float tx = 0;
-float ty = 0;
+  public int vertices, edges, faces;
+  public float[] rXYZ = {0,0,0};
+  public float[] sXYZ = {1,1,1};
+  public float[] tXYZ = {0,0,0};
 
-float sz = 1;
-float sx = 1;
-float sy = 1;
+  public float[][] points;
+  public float[][] lines;
+  public float[][] cFaces;
+
+  public void init(int vertices, int edges, int faces){
+    this.vertices = vertices;
+    this.edges = edges;
+    this.faces = faces;
+  }
+
+  public void create(float[][] points, float[][] lines, float[][] cFaces){
+    this.points = points;
+    this.lines = lines;
+    this.cFaces = cFaces;
+  }
+
+  public void setPoints(float[][] points){
+    this.points = points;
+  }
+  public float[][] getPoints(){
+    return this.points;
+  }
+
+  public void setLines(float[][] lines){
+    this.lines = lines;
+  }
+  public float[][] getLines(){
+    return this.lines;
+  }
+
+  public void setFaces(float[][] cFaces){
+    this.cFaces = cFaces;
+  }
+  public float[][] getFaces(){
+    return this.cFaces;
+  }
+
+  public void setrXYZ(float[] rXYZ){
+    this.rXYZ = rXYZ;
+  }
+
+  public float[] getrXYZ(){
+    return this.rXYZ;
+  }
+
+  public void setsXYZ(float[] sXYZ){
+    this.sXYZ = sXYZ;
+  }
+
+  public float[] getsXYZ(){
+    return this.sXYZ;
+  }
+
+  public void settXYZ(float[] tXYZ){
+    this.tXYZ = tXYZ;
+  }
+
+  public float[] gettXYZ(){
+    return this.tXYZ;
+  }
+
+}
+
+/* =============================================================================================================== */
+/* =============================================================================================================== */
+
+float[] rXYZ = {0,0,0};
+float[] sXYZ = {1,1,1};
+float[] tXYZ = {0,0,0};
 
 float fx = 120;
 float fy = 120;
@@ -274,45 +342,70 @@ String[] Projections = {
 
 String text;
 
+
 void draw() {
 
   smooth();
 
   background(255);
 
-  float M[][] = new float[lines][columns];
+  Object[] Objs = new Object[10];
 
-  M = rotateM(cube, lines, columns, rz, rx, ry);
+  for( int i=0; i<10; i++ )
+    Objs[i] = new Object();
 
-  M = scaleM(M, lines, columns, sz, sx, sy);
+  Objs[0].init(vertices,edges,faces);
 
-  M = translateM(M, lines, columns, tz, tx, ty);
+  Objs[0].create(cube, L, cFaces);
 
-  debPrintM(M, lines, columns);
-
+  // float M[][] = new float[lines][columns];
+  //
+  Objs[0].setrXYZ(rXYZ);
+  Objs[0].setPoints(rotateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].rXYZ[0], Objs[0].rXYZ[1], Objs[0].rXYZ[2]));
+  //
+  // M = scaleM(M, lines, columns, sz, sx, sy);
+  Objs[0].setsXYZ(sXYZ);
+  Objs[0].setPoints(scaleM(Objs[0].points, Objs[0].vertices, columns, Objs[0].sXYZ[0], Objs[0].sXYZ[1], Objs[0].sXYZ[2]));
+  //
+  // M = translateM(M, lines, columns, tz, tx, ty);
+  Objs[0].settXYZ(tXYZ);
+  Objs[0].setPoints(translateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].tXYZ[0], Objs[0].tXYZ[1], Objs[0].tXYZ[2]));
+  //
+  // debPrintM(M, lines, columns);
+  debPrintM(Objs[0].getPoints(),vertices,columns);
+  //
   switch(p) {
   case 0:
-    M = cavaleiraProj(M, lines, columns);
+    Objs[0].setPoints(cavaleiraProj(Objs[0].getPoints(),vertices,columns));
+    // M = cavaleiraProj(M, lines, columns);
     break;
   case 1:
-    M = cabinetProj(M, lines, columns);
+    Objs[0].setPoints(cabinetProj(Objs[0].getPoints(),vertices,columns));
+    // M = cabinetProj(M, lines, columns);
     break;
   case 2:
-    M = isometricProj(M, lines, columns);
+    Objs[0].setPoints(isometricProj(Objs[0].getPoints(),vertices,columns));
+    // M = isometricProj(M, lines, columns);
     break;
   case 3:
-    M = escapepointProj(M, lines, columns, fz);
-    M = homogenize(M, lines, columns);
+    Objs[0].setPoints(escapepointProj(Objs[0].getPoints(),vertices,columns,fz));
+    Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
+    // M = escapepointProj(M, lines, columns, fz);
+    // M = homogenize(M, lines, columns);
     break;
   case 4:
-    M = escapepoint2Proj(M, lines, columns, fx, fz);
-    M = homogenize(M, lines, columns);
+    Objs[0].setPoints(escapepoint2Proj(Objs[0].getPoints(),vertices,columns,fx,fz));
+    Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
+    // M = escapepoint2Proj(M, lines, columns, fx, fz);
+    // M = homogenize(M, lines, columns);
     break;
   }
-
-  M = getMatrixT(M, lines, columns);
-
-  renderP(M, L, llines);
+  //
+  Objs[0].setPoints(getMatrixT(Objs[0].getPoints(),vertices,columns));
+  // M = getMatrixT(M, lines, columns);
+  //
+  renderP(Objs[0].points,Objs[0].lines,edges);
+  // renderP(M, L, llines);
 
   text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
 
@@ -331,85 +424,86 @@ void setup() {
 
 void keyPressed() {
   if (key == 'q' || key == 'Q') {
-    tz += 1;
+    tXYZ[2] += 1;
   }
   if (key == 'e' || key == 'E') {
-    tz -= 1;
+    tXYZ[2] -= 1;
   }
   if (key == 'd' || key == 'D') {
-    tx += 1;
+    tXYZ[0] += 1;
   }
   if (key == 'a' || key == 'A') {
-    tx -= 1;
+    tXYZ[0] -= 1;
   }
   if (key == 'w' || key == 'W') {
-    ty += 1;
+    tXYZ[1] += 1;
   }
   if (key == 's' || key == 'S') {
-    ty -= 1;
+    tXYZ[1] -= 1;
   }
 
   if (key == 'f' || key == 'F') {
-    rz += 0.1;
+    rXYZ[1] += 0.1;
   }
   if (key == 'h' || key == 'H') {
-    rz -= 0.1;
+    rXYZ[1] -= 0.1;
   }
   if (key == 'g' || key == 'G') {
-    rx += 0.1;
+    rXYZ[2] += 0.1;
   }
   if (key == 't' || key == 'T') {
-    rx -= 0.1;
+    rXYZ[2] -= 0.1;
   }
   if (key == 'y' || key == 'Y') {
-    ry += 0.1;
+    rXYZ[0] += 0.1;
   }
   if (key == 'r' || key == 'R') {
-    ry -= 0.1;
+    rXYZ[0] -= 0.1;
   }
 
   if (key == '1') {
-    sx += 0.1;
+    sXYZ[0] += 0.1;
   }
   if (key == '3') {
-    sy += 0.1;
+    sXYZ[1] += 0.1;
   }
   if (key == '5') {
-    sz += 0.1;
+    sXYZ[2] += 0.1;;
   }
   if (key == '7') {
-    sx += 0.1;
-    sy += 0.1;
-    sz += 0.1;
+    sXYZ[0] += 0.1;
+    sXYZ[1] += 0.1;
+    sXYZ[2] += 0.1;
   }
 
   if (key == '2') {
-    sx -= 0.1;
+    sXYZ[0] -= 0.1;
   }
   if (key == '4') {
-    sy -= 0.1;
+    sXYZ[1] -= 0.1;
   }
   if (key == '6') {
-    sz -= 0.1;
+    sXYZ[2] -= 0.1;;
   }
   if (key == '8') {
-    sx -= 0.1;
-    sy -= 0.1;
-    sz -= 0.1;
+    sXYZ[0] -= 0.1;
+    sXYZ[1] -= 0.1;
+    sXYZ[2] -= 0.1;
   }
 
   if (key == 'o' || key == 'O' ) {
-    rz = 0;
-    rx = 0;
-    ry = 0;
 
-    tz = 0;
-    tx = 0;
-    ty = 0;
+    rXYZ[0] = 0;
+    rXYZ[1] = 0;
+    rXYZ[2] = 0;
 
-    sz = 1;
-    sx = 1;
-    sy = 1;
+    tXYZ[0] = 0;
+    tXYZ[1] = 0;
+    tXYZ[2] = 0;
+
+    sXYZ[0] = 1;
+    sXYZ[1] = 1;
+    sXYZ[2] = 1;
   }
 
   if (key == 'p') {
