@@ -258,8 +258,8 @@ Object[] readFile(){
 
   minx = int(maxs[0]);
   maxx = int(maxs[1]);
-  miny = int(maxs[0]);
-  maxy = int(maxs[1]);
+  miny = int(maxs[2]);
+  maxy = int(maxs[3]);
 
   n = int(lines[2]);
 
@@ -268,6 +268,11 @@ Object[] readFile(){
   for( int i=0; i<n; i++ )
     Objects[i] = new Object();
 
+  int i = 4;
+
+  while (lines.charAt(i) != '#'){
+      cmps = split(lines[],' ');
+  }
 
   return Objects;
 }
