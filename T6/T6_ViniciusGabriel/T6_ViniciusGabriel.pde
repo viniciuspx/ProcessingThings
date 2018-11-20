@@ -244,6 +244,33 @@ float[][] scaleM(float M[][], int n, int m, float sz, float sx, float sy) {
   return M;
 }
 
+Object[] readFile(){
+
+  int n;
+
+  String maxs[];
+
+  String cmps[];
+
+  Object[] Objects = new Object[10];
+
+  for( int i=0; i<10; i++ )
+    Objects[i] = new Object();
+
+  String[] lines = loadStrings("figure.dat");
+
+  maxs = split(lines[1],' ');
+
+  minx = int(maxs[0]);
+  maxx = int(maxs[1]);
+  miny = int(maxs[0]);
+  maxy = int(maxs[1]);
+
+  n = int(lines[2]);
+
+  return Objects;
+}
+
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
@@ -358,56 +385,41 @@ void draw() {
 
   Objs[0].create(cube, L, cFaces);
 
-  // float M[][] = new float[lines][columns];
-  //
   Objs[0].setrXYZ(rXYZ);
   Objs[0].setPoints(rotateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].rXYZ[0], Objs[0].rXYZ[1], Objs[0].rXYZ[2]));
-  //
-  // M = scaleM(M, lines, columns, sz, sx, sy);
   Objs[0].setsXYZ(sXYZ);
   Objs[0].setPoints(scaleM(Objs[0].points, Objs[0].vertices, columns, Objs[0].sXYZ[0], Objs[0].sXYZ[1], Objs[0].sXYZ[2]));
-  //
-  // M = translateM(M, lines, columns, tz, tx, ty);
   Objs[0].settXYZ(tXYZ);
   Objs[0].setPoints(translateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].tXYZ[0], Objs[0].tXYZ[1], Objs[0].tXYZ[2]));
-  //
-  // debPrintM(M, lines, columns);
   debPrintM(Objs[0].getPoints(),vertices,columns);
-  //
+
   switch(p) {
   case 0:
     Objs[0].setPoints(cavaleiraProj(Objs[0].getPoints(),vertices,columns));
-    // M = cavaleiraProj(M, lines, columns);
     break;
   case 1:
     Objs[0].setPoints(cabinetProj(Objs[0].getPoints(),vertices,columns));
-    // M = cabinetProj(M, lines, columns);
     break;
   case 2:
     Objs[0].setPoints(isometricProj(Objs[0].getPoints(),vertices,columns));
-    // M = isometricProj(M, lines, columns);
     break;
   case 3:
     Objs[0].setPoints(escapepointProj(Objs[0].getPoints(),vertices,columns,fz));
     Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
-    // M = escapepointProj(M, lines, columns, fz);
-    // M = homogenize(M, lines, columns);
     break;
   case 4:
     Objs[0].setPoints(escapepoint2Proj(Objs[0].getPoints(),vertices,columns,fx,fz));
     Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
-    // M = escapepoint2Proj(M, lines, columns, fx, fz);
-    // M = homogenize(M, lines, columns);
     break;
   }
-  //
+
   Objs[0].setPoints(getMatrixT(Objs[0].getPoints(),vertices,columns));
-  // M = getMatrixT(M, lines, columns);
-  //
+
   renderP(Objs[0].points,Objs[0].lines,edges);
-  // renderP(M, L, llines);
 
   text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
+
+  Objs = readFile();
 
   textAlign(TOP);
   textFont(f);
