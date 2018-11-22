@@ -58,7 +58,7 @@ float[][] L = {
 
 };
 
-float[][] cFaces = new float[faces][vertices+3];
+float[][] cFaces = new float[faces][faces+3];
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
@@ -268,11 +268,71 @@ Object[] readFile(){
   for( int i=0; i<n; i++ )
     Objects[i] = new Object();
 
-  int i = 4;
+  int i = 4, id = 0;
 
-  while (lines.charAt(i) != '#'){
-      cmps = split(lines[],' ');
+  while (lines[i].charAt(0) != '#'){
+
+      print(lines[i].charAt(0));
+
+      if(lines[i-1].charAt(0) == '#')
+          cmps = split(lines[i],' ');
+
+      Objects[id].init(int(cmps[0]),int(cmps[1]),int(cmps[2]));
+
+      float[][] mAux1 = new float[Objects[id].getVertices()][4];
+
+      int j = 0;
+
+      if (cmps.length == 3){
+        while( j < Objects[id].getVertices()){
+          cmps = split(lines[i],' ');
+          mAux1[j][0] = float(cmps[0]);
+          mAux1[j][1] = float(cmps[1]);
+          mAux1[j][2] = float(cmps[2]);
+          mAux1[j][3] = 1;
+          j++;
+          i++;
+        }
+        debPrintM(mAux1,Objects[id].getVertices(),4);
+      }
+
+      cmps = split(lines[i],' ');
+
+      float[][] mAux2 = new float[Objects[id].getEdges()][2];
+
+      j = 0;
+
+      if(cmps.length == 2){
+        while( j < Objects[id].getEdges()){
+          cmps = split(lines[i],' ');
+          mAux2[j][0] = float(cmps[0]);
+          mAux2[j][1] = float(cmps[1]);
+          j++;
+          i++;
+        }
+        debPrintM(mAux2,Objects[id].getEdges(),2);
+      }
+
+      print(i + "\n");
+
+      float[][] mAux3 = new float[Objects[id].getxFaces()][((Objects[id].getxFaces() - 1) + 3)];
+
+      j = 0;
+
+      if(cmps.length == ((Objects[id].getxFaces() - 1) + 3)){
+        while( j < Objects[id].getEdges()){
+          cmps = split(lines[i],' ');
+          for(int it = 0 ; it < cmps.length ; it++ )
+            mAux3[j][it] = float(cmps[it]);
+          j++;
+          i++;
+        }
+        debPrintM(mAux3,Objects[id].getxFaces(),((Objects[id].getxFaces() - 1) + 3));
+      }
+
+
   }
+
 
   return Objects;
 }
@@ -346,6 +406,18 @@ class Object {
 
   public float[] gettXYZ(){
     return this.tXYZ;
+  }
+
+  public int getVertices(){
+    return this.vertices;
+  }
+
+  public int getEdges(){
+    return this.edges;
+  }
+
+  public int getxFaces(){
+    return this.faces;
   }
 
 }
