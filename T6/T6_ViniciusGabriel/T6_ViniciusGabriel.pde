@@ -12,10 +12,7 @@ int h = maxy - miny;
 int w = maxx - minx;
 int d = maxz - minz;
 
-int vertices = 8;
 int columns = 4;
-int edges = 12;
-int faces = 6;
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
@@ -57,8 +54,6 @@ float[][] L = {
   {3, 7}
 
 };
-
-float[][] cFaces = new float[faces][faces+3];
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
@@ -116,7 +111,7 @@ void debPrintM (float[][] M, int l, int c) {
 void renderP(float[][] M, float[][] L, int l) {
   for (int i = 0; i < l; i ++) {
     stroke(0);
-    linDDA(M[int(L[i][0])][0], M[int(L[i][0])][1], M[int(L[i][1])][0], M[int(L[i][1])][1]);
+    linDDA(M[int(L[i][0]) - 1][0], M[int(L[i][0]) - 1][1], M[int(L[i][1]) - 1][0], M[int(L[i][1]) - 1][1]);
   }
 }
 
@@ -270,15 +265,14 @@ Object[] readFile(){
 
   int i = 4, id = 0;
 
-  while (lines[i].charAt(0) != '#'){
+  while (id < n){
 
-      print(lines[i].charAt(0));
-
-      if(lines[i-1].charAt(0) == '#')
-          cmps = split(lines[i],' ');
+      cmps = split(lines[i],' ');
 
       Objects[id].init(int(cmps[0]),int(cmps[1]),int(cmps[2]));
-
+      
+      i++;
+      
       float[][] mAux1 = new float[Objects[id].getVertices()][4];
 
       int j = 0;
@@ -293,7 +287,7 @@ Object[] readFile(){
           j++;
           i++;
         }
-        debPrintM(mAux1,Objects[id].getVertices(),4);
+        Objects[id].setPoints(mAux1);
       }
 
       cmps = split(lines[i],' ');
@@ -303,36 +297,55 @@ Object[] readFile(){
       j = 0;
 
       if(cmps.length == 2){
-        while( j < Objects[id].getEdges()){
+        while( j < Objects[id].getEdges() ){
           cmps = split(lines[i],' ');
           mAux2[j][0] = float(cmps[0]);
           mAux2[j][1] = float(cmps[1]);
           j++;
           i++;
         }
-        debPrintM(mAux2,Objects[id].getEdges(),2);
+        Objects[id].setLines(mAux2);
       }
+      
+      cmps = split(lines[i],' ');
 
-      print(i + "\n");
-
-      float[][] mAux3 = new float[Objects[id].getxFaces()][((Objects[id].getxFaces() - 1) + 3)];
+      float[][] mAux3 = new float[Objects[id].getxFaces()][Objects[id].getVertices()+5];
 
       j = 0;
 
-      if(cmps.length == ((Objects[id].getxFaces() - 1) + 3)){
-        while( j < Objects[id].getEdges()){
+      if(cmps.length > 3){
+        while( j < Objects[id].getxFaces()){
           cmps = split(lines[i],' ');
-          for(int it = 0 ; it < cmps.length ; it++ )
-            mAux3[j][it] = float(cmps[it]);
+          for(int it = 0 ; it < cmps.length ; it++ ) mAux3[j][it] = float(cmps[it]);
           j++;
           i++;
         }
-        debPrintM(mAux3,Objects[id].getxFaces(),((Objects[id].getxFaces() - 1) + 3));
+        Objects[id].setFaces(mAux3);
       }
-
-
+      
+      cmps = split(lines[i],' ');
+      
+      Objects[id].setrXYZ(float(cmps));
+      
+      i++;
+      
+      cmps = split(lines[i],' ');
+      
+      Objects[id].setsXYZ(float(cmps));
+      
+      i++;
+      
+      cmps = split(lines[i],' ');
+      
+      Objects[id].settXYZ(float(cmps));
+      
+      i++;
+      
+      id++;
+      
+      i++;
+      
   }
-
 
   return Objects;
 }
@@ -435,6 +448,8 @@ float fz = 120;
 
 int p = 0;
 
+int id = 0;
+
 PFont f;
 
 String[] Projections = {
@@ -456,48 +471,46 @@ void draw() {
 
   Object[] Objs = new Object[10];
 
-  for( int i=0; i<10; i++ )
-    Objs[i] = new Object();
+  Objs = readFile();
 
-  Objs[0].init(vertices,edges,faces);
+  //Objs[0].init(vertices,edges,faces);
 
-  Objs[0].create(cube, L, cFaces);
+  //Objs[0].create(cube, L, cFaces);
 
-  Objs[0].setrXYZ(rXYZ);
-  Objs[0].setPoints(rotateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].rXYZ[0], Objs[0].rXYZ[1], Objs[0].rXYZ[2]));
-  Objs[0].setsXYZ(sXYZ);
-  Objs[0].setPoints(scaleM(Objs[0].points, Objs[0].vertices, columns, Objs[0].sXYZ[0], Objs[0].sXYZ[1], Objs[0].sXYZ[2]));
-  Objs[0].settXYZ(tXYZ);
-  Objs[0].setPoints(translateM(Objs[0].points, Objs[0].vertices, columns, Objs[0].tXYZ[0], Objs[0].tXYZ[1], Objs[0].tXYZ[2]));
-  debPrintM(Objs[0].getPoints(),vertices,columns);
+  Objs[id].setPoints(rotateM(Objs[id].points, Objs[id].vertices, columns, Objs[id].rXYZ[0], Objs[id].rXYZ[1], Objs[id].rXYZ[2]));
+  Objs[id].setrXYZ(rXYZ);
+  Objs[id].setPoints(scaleM(Objs[id].points, Objs[id].vertices, columns, Objs[id].sXYZ[0], Objs[id].sXYZ[1], Objs[id].sXYZ[2]));
+  Objs[id].setsXYZ(sXYZ);
+  Objs[id].setPoints(translateM(Objs[id].points, Objs[id].vertices, columns, Objs[id].tXYZ[0], Objs[id].tXYZ[1], Objs[id].tXYZ[2]));
+  Objs[id].settXYZ(tXYZ);
+  
+  debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
 
   switch(p) {
   case 0:
-    Objs[0].setPoints(cavaleiraProj(Objs[0].getPoints(),vertices,columns));
+    Objs[id].setPoints(cavaleiraProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
     break;
   case 1:
-    Objs[0].setPoints(cabinetProj(Objs[0].getPoints(),vertices,columns));
+    Objs[id].setPoints(cabinetProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
     break;
   case 2:
-    Objs[0].setPoints(isometricProj(Objs[0].getPoints(),vertices,columns));
+    Objs[id].setPoints(isometricProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
     break;
   case 3:
-    Objs[0].setPoints(escapepointProj(Objs[0].getPoints(),vertices,columns,fz));
-    Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
+    Objs[id].setPoints(escapepointProj(Objs[id].getPoints(),Objs[id].getVertices(),columns,fz));
+    Objs[id].setPoints(homogenize(Objs[id].getPoints(),Objs[id].getVertices(),columns));
     break;
   case 4:
-    Objs[0].setPoints(escapepoint2Proj(Objs[0].getPoints(),vertices,columns,fx,fz));
-    Objs[0].setPoints(homogenize(Objs[0].getPoints(),vertices,columns));
+    Objs[id].setPoints(escapepoint2Proj(Objs[id].getPoints(),Objs[id].getVertices(),columns,fx,fz));
+    Objs[id].setPoints(homogenize(Objs[id].getPoints(),Objs[id].getVertices(),columns));
     break;
   }
 
-  Objs[0].setPoints(getMatrixT(Objs[0].getPoints(),vertices,columns));
+  Objs[id].setPoints(getMatrixT(Objs[id].getPoints(),Objs[id].getVertices(),columns));
 
-  renderP(Objs[0].points,Objs[0].lines,edges);
+  renderP(Objs[id].getPoints(),Objs[id].getLines(),Objs[id].edges);
 
   text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
-
-  Objs = readFile();
 
   textAlign(TOP);
   textFont(f);
@@ -600,4 +613,10 @@ void keyPressed() {
     p += 1;
     if (p == 5) p = 0;
   }
+  
+  if (key == TAB) {
+    id++;
+    if (id == 2) id = 1 ;
+  }
+  
 }
