@@ -17,44 +17,6 @@ int columns = 4;
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-
-/* =============================================================================================================== */
-/* =============================================================================================================== */
-
-
-float[][] cube = {
-
-  {-30, -30, -30, 1},
-  {30, -30, -30, 1},
-  {-30, 30, -30, 1},
-  {30, 30, -30, 1},
-
-  {-30, -30, 30, 1},
-  {30, -30, 30, 1},
-  {-30, 30, 30, 1},
-  {30, 30, 30, 1}
-
-};
-
-float[][] L = {
-
-  {0, 1},
-  {0, 2},
-  {2, 3},
-  {1, 3},
-
-  {4, 5},
-  {4, 6},
-  {6, 7},
-  {7, 5},
-
-  {2, 6},
-  {0, 4},
-  {1, 5},
-  {3, 7}
-
-};
-
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
@@ -86,7 +48,7 @@ void linDDA(float xi, float yi, float xf, float yf) {
 float[][] multiplyMatrix(float[][] M, float[][]N, int m, int n, int s) {
 
   float R[][] = new float[m][s];
-
+  
   for (int i=0; i<m; ++i) for (int j=0; j<n; ++j) for (int k=0; k<s; ++k) {
     R[i][j] += M[i][k] * N[k][j];
   }
@@ -106,9 +68,12 @@ void debPrintM (float[][] M, int l, int c) {
   }
 }
 
-void renderP(float[][] M, float[][] L, int l) {
+void renderP(float[][] M, float[][] L, int l, boolean c) {
   for (int i = 0; i < l; i ++) {
-    stroke(0);
+    
+    if(c == true) stroke(255,255,255); 
+    else stroke(255,119,0);
+    
     linDDA(M[int(L[i][0]) - 1][0], M[int(L[i][0]) - 1][1], M[int(L[i][1]) - 1][0], M[int(L[i][1]) - 1][1]);
   }
 }
@@ -599,13 +564,20 @@ void setup() {
   size(1200, 800);
   frameRate(60);
   background(255);
-  f = createFont("Arial", 14, true);
-  Objs = readFile();  
+  f = createFont("Arial", 16, true);
+  Objs = readFile(); 
+  for (int i = 0 ; i < Objs.length ; i++){
+    Objs[i].rotate();
+    Objs[i].scale();
+    Objs[i].translate();
+    Objs[i].projection(p);
+    Objs[i].transform();
+  }
 }
 
 void draw() {
 
-  background(255);
+  background(95,95,105);
 
   Objs[id].listen();
   Objs[id].rotate();
@@ -615,15 +587,18 @@ void draw() {
   debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
  
   Objs[id].projection(p);
-  Objs[id].transform();   
+  Objs[id].transform();  
   
-  for (int i = 0 ; i < Objs.length ; i++) renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges);
-
+  for (int i = 0 ; i < Objs.length ; i++) {
+    renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges,false);
+    if(i != id) renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges,true);
+  }
+  
   text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n ( + e - ) - Escalona XYZ \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
   textAlign(TOP);
   textFont(f);
   text(text, 5, 45);
-  fill(200, 0, 0);
+  fill(0, 0, 255);
 }
 
 void keyPressed() {
@@ -634,6 +609,10 @@ void keyPressed() {
   if (key == TAB) {
     id += 1;
     if (id == Objs.length) id = 0;
+  }
+  if (key == SHIFT && key == TAB) {
+    id -= 1;
+    if (id == 0) id = Objs.length;
   }
   if (key == ESC) exit();
 }
