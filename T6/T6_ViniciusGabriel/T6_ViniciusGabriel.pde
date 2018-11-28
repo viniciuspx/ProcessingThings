@@ -399,8 +399,8 @@ class Object {
     float[][] R3 = {{cos(this.rXYZ[1]), 0, -sin(this.rXYZ[1]), 0}, {0, 1, 0, 0}, {sin(this.rXYZ[1]), 0, cos(this.rXYZ[1]), 0}, {0, 0, 0, 1}};
   
     this.points = dot(this.oldPoints, R1, this.vertices, columns, 4);
-    this.points = dot(this.oldPoints, R2, this.vertices, columns, 4);
-    this.points = dot(this.oldPoints, R3, this.vertices, columns, 4);
+    this.points = dot(this.points, R2, this.vertices, columns, 4);
+    this.points = dot(this.points, R3, this.vertices, columns, 4);
     
   }
   
@@ -468,24 +468,106 @@ class Object {
   
   }
   
-  void listener(){
-  
-    float[] aux = {0,0,0};
+  void listen(){
     
-    if(key == 'w'){
-      this.tXYZ[0] += 1.0;
-    }
+   if(keyPressed == true){
     
-    if(key == 's'){
-      this.tXYZ[0] -= 1.0;
-    }
+      float[] aux = {0,0,0};
+      float[] raux = {0,0,0};
+      
+      if(key == 'w'){
+        this.tXYZ[1] += 1.0;
+      }
+      
+      if(key == 's'){
+        this.tXYZ[1] -= 1.0;
+      }
+      
+      if(key == 'a'){
+        this.tXYZ[0] -= 1.0;
+      }
+      
+      if(key == 'd'){
+        this.tXYZ[0] += 1.0;
+      }
+      
+      if(key == 'e'){
+        this.tXYZ[2] += 1.0;
+      }
+      
+      if(key == 'q'){
+        this.tXYZ[2] -= 1.0;
+      }
+      
+       if(key == 't'){
+        this.rXYZ[0] += 0.03;
+      }
+      
+      if(key == 'g'){
+        this.rXYZ[0] -= 0.03;
+      }
+      
+      if(key == 'h'){
+        this.rXYZ[1] += 0.03;
+      }
+      
+      if(key == 'f'){
+        this.rXYZ[1] -= 0.03;
+      }
+      
+      if(key == 'y'){
+        this.rXYZ[2] += 0.03;
+      }
+      
+      if(key == 'r'){
+        this.rXYZ[2] -= 0.03;
+      }
+      
+      if(key == '1'){
+        this.sXYZ[0] += 0.1;
+      }
+      
+      if(key == '2'){
+        this.sXYZ[0] -= 0.1;
+      }
+      
+      if(key == '3'){
+        this.sXYZ[1] += 0.1;
+      }
+      
+      if(key == '4'){
+        this.sXYZ[1] -= 0.1;
+      }
+      
+      if(key == '5'){
+        this.sXYZ[2] += 0.1;
+      }
+      
+      if(key == '6'){
+        this.sXYZ[2] -= 0.1;
+      }
+      
+      if(key == '+'){
+        this.sXYZ[0] += 0.1;
+        this.sXYZ[1] += 0.1;
+        this.sXYZ[2] += 0.1;
+      }
+      
+      if(key == '-'){
+        this.sXYZ[0] -= 0.1;
+        this.sXYZ[1] -= 0.1;
+        this.sXYZ[2] -= 0.1;
+      }
+      
+      if (key == 'o' || key == 'O' ) {
+        this.tXYZ = aux;
+        this.rXYZ = raux;
+      }
+   
+   }
     
-    if (key == 'o' || key == 'O' ) {
-      this.tXYZ = aux;
-    }
-  
-  
   }
+  
 
 }
 
@@ -499,6 +581,7 @@ float fy = 80;
 float fz = 80;
 
 int p = 0;
+int id = 0;
 
 PFont f;
 
@@ -523,25 +606,20 @@ void setup() {
 void draw() {
 
   background(255);
-  
-  Objs[id].listener();
-   
-  for (int id = 0 ; id < Objs.length ; id++){
-    
-    Objs[id].rotate();
-    Objs[id].scale();
-    Objs[id].translate();
-      
-    debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
-    
-    Objs[id].projection(p);
-    Objs[id].transform();
-      
-    renderP(Objs[id].getPoints(),Objs[id].getLines(),Objs[id].edges);
-  
-  }
 
-  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
+  Objs[id].listen();
+  Objs[id].rotate();
+  Objs[id].scale();
+  Objs[id].translate();
+    
+  debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
+ 
+  Objs[id].projection(p);
+  Objs[id].transform();   
+  
+  for (int i = 0 ; i < Objs.length ; i++) renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges);
+
+  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n ( + e - ) - Escalona XYZ \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
   textAlign(TOP);
   textFont(f);
   text(text, 5, 45);
@@ -552,6 +630,10 @@ void keyPressed() {
   if (key == 'p') {
     p += 1;
     if (p == 5) p = 0;
+  }
+  if (key == TAB) {
+    id += 1;
+    if (id == Objs.length) id = 0;
   }
   if (key == ESC) exit();
 }
