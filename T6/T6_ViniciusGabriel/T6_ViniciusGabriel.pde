@@ -58,8 +58,6 @@ float[][] L = {
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-
-
 void linDDA(float xi, float yi, float xf, float yf) {
 
   float dx = xf - xi, dy = yf - yi, steps;
@@ -115,42 +113,9 @@ void renderP(float[][] M, float[][] L, int l) {
   }
 }
 
-float[][] getMatrixT(float[][] L, int n, int m) {
-
-  float R[][] = new float[n][m];
-
-  for (int i = 0; i < n; i ++) R[i] = transformCoords(L[i][0], L[i][1], L[i][2]);
-
-  return R;
-}
-
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
-
-float[] transformCoords(float x, float y, float z) {
-
-  float[] coords = {0, 0, 0, 1};
-
-  float x_l, y_l, z_l;
-  float x_ll, y_ll, z_ll;
-
-  x_l = x - minx;
-  y_l = y - miny;
-  z_l = z - minz;
-
-  float m = min(width/w, height/h);
-
-  x_ll = x_l;
-  y_ll = h - y_l;
-  z_ll = d - z_l;
-
-  coords[0] = x_ll*m + (width - w*m)/2;
-  coords[1] = y_ll*m + (height - h*m)/2;
-  coords[2] = z_ll*m;
-
-  return coords;
-}
 
 float[][] cavaleiraProj(float M[][], int n, int m) {
 
@@ -208,36 +173,8 @@ float[][] homogenize(float M[][], int n, int m) {
   return M;
 }
 
-float[][] rotateM(float M[][], int n, int m, float rz, float rx, float ry) {
-
-  float[][] R1 = {{cos(rz), sin(rz), 0, 0}, {-sin(rz), cos(rz), 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
-  float[][] R2 = {{1, 0, 0, 0}, {0, cos(rx), sin(rx), 0}, {0, -sin(rx), cos(rx), 0}, {0, 0, 0, 1}};
-  float[][] R3 = {{cos(ry), 0, -sin(ry), 0}, {0, 1, 0, 0}, {sin(ry), 0, cos(ry), 0}, {0, 0, 0, 1}};
-
-  M = multiplyMatrix(M, R1, n, m, 4);
-  M = multiplyMatrix(M, R2, n, m, 4);
-  M = multiplyMatrix(M, R3, n, m, 4);
-
-  return M;
-}
-
-float[][] translateM(float M[][], int n, int m, float tz, float tx, float ty) {
-
-  float[][] T = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {tx, ty, tz, 1}};
-
-  M = multiplyMatrix(M, T, n, m, 4);
-
-  return M;
-}
-
-float[][] scaleM(float M[][], int n, int m, float sz, float sx, float sy) {
-
-  float[][] S = {{sx, 0, 0, 0}, {0, sy, 0, 0}, {0, 0, sz, 0}, {1, 1, 1, 1}};
-
-  M = multiplyMatrix(M, S, n, m, 4);
-
-  return M;
-}
+/* =============================================================================================================== */
+/* =============================================================================================================== */
 
 Object[] readFile(){
 
@@ -356,10 +293,11 @@ Object[] readFile(){
 class Object {
 
   public int vertices, edges, faces;
-  public float[] rXYZ = {0,0,0};
-  public float[] sXYZ = {1,1,1};
-  public float[] tXYZ = {0,0,0};
+  public float[] rXYZ;
+  public float[] sXYZ;
+  public float[] tXYZ;
 
+  public float[][] oldPoints;
   public float[][] points;
   public float[][] lines;
   public float[][] cFaces;
@@ -378,6 +316,7 @@ class Object {
 
   public void setPoints(float[][] points){
     this.points = points;
+    this.oldPoints = points;
   }
   public float[][] getPoints(){
     return this.points;
@@ -432,25 +371,134 @@ class Object {
   public int getxFaces(){
     return this.faces;
   }
+  
+  
+  float[][] dot(float[][] M, float[][]N, int m, int n, int s) {
+
+    float R[][] = new float[m][s];
+  
+    for (int i=0; i<m; ++i) for (int j=0; j<n; ++j) for (int k=0; k<s; ++k) {
+      R[i][j] += M[i][k] * N[k][j];
+    }
+  
+    return R;
+  }
+  
+  void translate() {
+
+    float[][] T = {{1, 0, 0, 0}, {0, 1, 0, 0}, {0, 0, 1, 0}, {this.tXYZ[0], this.tXYZ[1], this.tXYZ[2], 1}};
+  
+    this.points = dot(this.points, T, this.vertices, columns, 4);
+
+  }
+  
+  void rotate() {
+
+    float[][] R1 = {{cos(this.rXYZ[2]), sin(this.rXYZ[2]), 0, 0}, {-sin(this.rXYZ[2]), cos(this.rXYZ[2]), 0, 0}, {0, 0, 1, 0}, {0, 0, 0, 1}};
+    float[][] R2 = {{1, 0, 0, 0}, {0, cos(this.rXYZ[0]), sin(this.rXYZ[0]), 0}, {0, -sin(this.rXYZ[0]), cos(this.rXYZ[0]), 0}, {0, 0, 0, 1}};
+    float[][] R3 = {{cos(this.rXYZ[1]), 0, -sin(this.rXYZ[1]), 0}, {0, 1, 0, 0}, {sin(this.rXYZ[1]), 0, cos(this.rXYZ[1]), 0}, {0, 0, 0, 1}};
+  
+    this.points = dot(this.oldPoints, R1, this.vertices, columns, 4);
+    this.points = dot(this.oldPoints, R2, this.vertices, columns, 4);
+    this.points = dot(this.oldPoints, R3, this.vertices, columns, 4);
+    
+  }
+  
+  void scale() {
+
+    float[][] S = {{this.sXYZ[0], 0, 0, 0}, {0, this.sXYZ[1], 0, 0}, {0, 0, this.sXYZ[2], 0}, {1, 1, 1, 1}};
+  
+    this.points = dot(this.points, S, this.vertices, columns, 4);
+
+  }
+  
+  float[] transformCoords(float x, float y, float z) {
+
+    float[] coords = {0, 0, 0, 1};
+  
+    float x_l, y_l, z_l;
+    float x_ll, y_ll, z_ll;
+  
+    x_l = x - minx;
+    y_l = y - miny;
+    z_l = z - minz;
+  
+    float m = min(width/w, height/h);
+  
+    x_ll = x_l;
+    y_ll = h - y_l;
+    z_ll = d - z_l;
+  
+    coords[0] = x_ll*m + (width - w*m)/2;
+    coords[1] = y_ll*m + (height - h*m)/2;
+    coords[2] = z_ll*m;
+  
+    return coords;
+  }
+  
+  void transform() {
+  
+    for (int i = 0; i < this.vertices; i ++) 
+      this.points[i] = transformCoords(this.points[i][0], this.points[i][1], this.points[i][2]);
+ 
+  }
+  
+  void projection(int p){
+    
+    switch(p) {
+      case 0:
+        this.points = cavaleiraProj(this.points,this.vertices,columns);
+        break;
+      case 1:
+        this.points = cabinetProj(this.points,this.vertices,columns);
+        break;
+      case 2:
+        this.points = isometricProj(this.points,this.vertices,columns);
+        break;
+      case 3:
+        this.points = escapepointProj(this.points,this.vertices,columns,fz);
+        this.points = homogenize(this.points,this.vertices,columns);
+        break;
+      case 4:
+        this.points = escapepoint2Proj(this.points,this.vertices,columns,fx,fz);
+        this.points = homogenize(this.points,this.vertices,columns);
+        break;
+    }
+  
+  
+  }
+  
+  void listener(){
+  
+    float[] aux = {0,0,0};
+    
+    if(key == 'w'){
+      this.tXYZ[0] += 1.0;
+    }
+    
+    if(key == 's'){
+      this.tXYZ[0] -= 1.0;
+    }
+    
+    if (key == 'o' || key == 'O' ) {
+      this.tXYZ = aux;
+    }
+  
+  
+  }
 
 }
 
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-float[] rXYZ;
-float[] sXYZ;
-float[] tXYZ;
+Object[] Objs;
 
-float fx = 120;
-float fy = 120;
-float fz = 120;
+float fx = 80;
+float fy = 80;
+float fz = 80;
 
 int p = 0;
-
-int sh = 0;
-
-int id = 0;
 
 PFont f;
 
@@ -464,152 +512,46 @@ String[] Projections = {
 
 String text;
 
-
-void draw() {
-
-  smooth();
-
-  background(255);
-
-  Object[] Objs = new Object[10];
-
-  Objs = readFile();
-  
-  if(sh == 0) rXYZ = Objs[id].getrXYZ();
-  if(sh == 0) sXYZ = Objs[id].getsXYZ();
-  if(sh == 0) tXYZ = Objs[id].gettXYZ();
- 
-  Objs[id].setPoints(rotateM(Objs[id].points, Objs[id].vertices, columns, rXYZ[0], rXYZ[1], rXYZ[2]));
-  Objs[id].setPoints(scaleM(Objs[id].points, Objs[id].vertices, columns, sXYZ[0], sXYZ[1], sXYZ[2]));
-  Objs[id].setPoints(translateM(Objs[id].points, Objs[id].vertices, columns, tXYZ[0], tXYZ[1], tXYZ[2]));
-  
-  
-  debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
-
-  switch(p) {
-  case 0:
-    Objs[id].setPoints(cavaleiraProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-    break;
-  case 1:
-    Objs[id].setPoints(cabinetProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-    break;
-  case 2:
-    Objs[id].setPoints(isometricProj(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-    break;
-  case 3:
-    Objs[id].setPoints(escapepointProj(Objs[id].getPoints(),Objs[id].getVertices(),columns,fz));
-    Objs[id].setPoints(homogenize(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-    break;
-  case 4:
-    Objs[id].setPoints(escapepoint2Proj(Objs[id].getPoints(),Objs[id].getVertices(),columns,fx,fz));
-    Objs[id].setPoints(homogenize(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-    break;
-  }
-
-  Objs[id].setPoints(getMatrixT(Objs[id].getPoints(),Objs[id].getVertices(),columns));
-
-  renderP(Objs[id].getPoints(),Objs[id].getLines(),Objs[id].edges);
-
-  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
-
-  textAlign(TOP);
-  textFont(f);
-  text(text, 5, 45);
-  fill(200, 0, 0);
-  sh++;
-    
-  if (key == 'o' || key == 'O' ) {
-    rXYZ = Objs[id].getrXYZ();
-    sXYZ = Objs[id].getsXYZ();
-    tXYZ = Objs[id].gettXYZ();  
-  }
-  
-}
-
 void setup() {
   size(1200, 800);
   frameRate(60);
   background(255);
-  f = createFont("Arial", 18, true);
+  f = createFont("Arial", 14, true);
+  Objs = readFile();  
+}
+
+void draw() {
+
+  background(255);
+  
+  Objs[id].listener();
+   
+  for (int id = 0 ; id < Objs.length ; id++){
+    
+    Objs[id].rotate();
+    Objs[id].scale();
+    Objs[id].translate();
+      
+    debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
+    
+    Objs[id].projection(p);
+    Objs[id].transform();
+      
+    renderP(Objs[id].getPoints(),Objs[id].getLines(),Objs[id].edges);
+  
+  }
+
+  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
+  textAlign(TOP);
+  textFont(f);
+  text(text, 5, 45);
+  fill(200, 0, 0);
 }
 
 void keyPressed() {
-  if (key == 'q' || key == 'Q') {
-    tXYZ[2] += 1;
-  }
-  if (key == 'e' || key == 'E') {
-    tXYZ[2] -= 1;
-  }
-  if (key == 'd' || key == 'D') {
-    tXYZ[0] += 1;
-  }
-  if (key == 'a' || key == 'A') {
-    tXYZ[0] -= 1;
-  }
-  if (key == 'w' || key == 'W') {
-    tXYZ[1] += 1;
-  }
-  if (key == 's' || key == 'S') {
-    tXYZ[1] -= 1;
-  }
-
-  if (key == 'f' || key == 'F') {
-    rXYZ[1] += 0.1;
-  }
-  if (key == 'h' || key == 'H') {
-    rXYZ[1] -= 0.1;
-  }
-  if (key == 'g' || key == 'G') {
-    rXYZ[2] += 0.1;
-  }
-  if (key == 't' || key == 'T') {
-    rXYZ[2] -= 0.1;
-  }
-  if (key == 'y' || key == 'Y') {
-    rXYZ[0] += 0.1;
-  }
-  if (key == 'r' || key == 'R') {
-    rXYZ[0] -= 0.1;
-  }
-
-  if (key == '1') {
-    sXYZ[0] += 0.1;
-  }
-  if (key == '3') {
-    sXYZ[1] += 0.1;
-  }
-  if (key == '5') {
-    sXYZ[2] += 0.1;;
-  }
-  if (key == '7') {
-    sXYZ[0] += 0.1;
-    sXYZ[1] += 0.1;
-    sXYZ[2] += 0.1;
-  }
-
-  if (key == '2') {
-    sXYZ[0] -= 0.1;
-  }
-  if (key == '4') {
-    sXYZ[1] -= 0.1;
-  }
-  if (key == '6') {
-    sXYZ[2] -= 0.1;;
-  }
-  if (key == '8') {
-    sXYZ[0] -= 0.1;
-    sXYZ[1] -= 0.1;
-    sXYZ[2] -= 0.1;
-  }
-
   if (key == 'p') {
     p += 1;
     if (p == 5) p = 0;
   }
-  
-  if (key == TAB) {
-    id++;
-    if (id == 2) id = 0 ;
-  }
-  
+  if (key == ESC) exit();
 }
