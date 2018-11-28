@@ -438,15 +438,17 @@ class Object {
 /* =============================================================================================================== */
 /* =============================================================================================================== */
 
-float[] rXYZ = {0,0,0};
-float[] sXYZ = {1,1,1};
-float[] tXYZ = {0,0,0};
+float[] rXYZ;
+float[] sXYZ;
+float[] tXYZ;
 
 float fx = 120;
 float fy = 120;
 float fz = 120;
 
 int p = 0;
+
+int sh = 0;
 
 int id = 0;
 
@@ -472,17 +474,15 @@ void draw() {
   Object[] Objs = new Object[10];
 
   Objs = readFile();
-
-  //Objs[0].init(vertices,edges,faces);
-
-  //Objs[0].create(cube, L, cFaces);
-
-  Objs[id].setPoints(rotateM(Objs[id].points, Objs[id].vertices, columns, Objs[id].rXYZ[0], Objs[id].rXYZ[1], Objs[id].rXYZ[2]));
-  Objs[id].setrXYZ(rXYZ);
-  Objs[id].setPoints(scaleM(Objs[id].points, Objs[id].vertices, columns, Objs[id].sXYZ[0], Objs[id].sXYZ[1], Objs[id].sXYZ[2]));
-  Objs[id].setsXYZ(sXYZ);
-  Objs[id].setPoints(translateM(Objs[id].points, Objs[id].vertices, columns, Objs[id].tXYZ[0], Objs[id].tXYZ[1], Objs[id].tXYZ[2]));
-  Objs[id].settXYZ(tXYZ);
+  
+  if(sh == 0) rXYZ = Objs[id].getrXYZ();
+  if(sh == 0) sXYZ = Objs[id].getsXYZ();
+  if(sh == 0) tXYZ = Objs[id].gettXYZ();
+ 
+  Objs[id].setPoints(rotateM(Objs[id].points, Objs[id].vertices, columns, rXYZ[0], rXYZ[1], rXYZ[2]));
+  Objs[id].setPoints(scaleM(Objs[id].points, Objs[id].vertices, columns, sXYZ[0], sXYZ[1], sXYZ[2]));
+  Objs[id].setPoints(translateM(Objs[id].points, Objs[id].vertices, columns, tXYZ[0], tXYZ[1], tXYZ[2]));
+  
   
   debPrintM(Objs[id].getPoints(),Objs[id].getVertices(),columns);
 
@@ -516,6 +516,14 @@ void draw() {
   textFont(f);
   text(text, 5, 45);
   fill(200, 0, 0);
+  sh++;
+    
+  if (key == 'o' || key == 'O' ) {
+    rXYZ = Objs[id].getrXYZ();
+    sXYZ = Objs[id].getsXYZ();
+    tXYZ = Objs[id].gettXYZ();  
+  }
+  
 }
 
 void setup() {
@@ -594,21 +602,6 @@ void keyPressed() {
     sXYZ[2] -= 0.1;
   }
 
-  if (key == 'o' || key == 'O' ) {
-
-    rXYZ[0] = 0;
-    rXYZ[1] = 0;
-    rXYZ[2] = 0;
-
-    tXYZ[0] = 0;
-    tXYZ[1] = 0;
-    tXYZ[2] = 0;
-
-    sXYZ[0] = 1;
-    sXYZ[1] = 1;
-    sXYZ[2] = 1;
-  }
-
   if (key == 'p') {
     p += 1;
     if (p == 5) p = 0;
@@ -616,7 +609,7 @@ void keyPressed() {
   
   if (key == TAB) {
     id++;
-    if (id == 2) id = 1 ;
+    if (id == 2) id = 0 ;
   }
   
 }
