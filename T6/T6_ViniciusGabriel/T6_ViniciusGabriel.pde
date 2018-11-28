@@ -594,7 +594,7 @@ void draw() {
     if(i != id) renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges,true);
   }
   
-  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n ( + e - ) - Escalona XYZ \n O - Origem \n P - Troca Proj \n\n Proj: " + Projections[p] + ".";
+  text = "Comandos \n WASDQE - Transladar \n TFGHRY - Rotacionar \n 1 a 8 - Escalonar \n ( + e - ) - Escalona XYZ \n O - Origem \n P - Troca Proj \n TAB - Troca Obj \n Proj: " + Projections[p] + ".";
   textAlign(TOP);
   textFont(f);
   text(text, 5, 45);
