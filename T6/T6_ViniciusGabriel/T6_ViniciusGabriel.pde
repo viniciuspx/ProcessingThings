@@ -590,6 +590,7 @@ void draw() {
   Objs[id].transform();  
   
   for (int i = 0 ; i < Objs.length ; i++) {
+    fill(0);
     renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges,false);
     if(i != id) renderP(Objs[i].getPoints(),Objs[i].getLines(),Objs[i].edges,true);
   }
